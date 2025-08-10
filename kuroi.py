@@ -1,6 +1,3 @@
-# kuroi_navigator_lengkap_v2.py - Versi Final
-# Program navigator berbasis suara untuk kacamata pintar tunanetra.
-
 import requests
 import json
 import gps
@@ -39,9 +36,39 @@ def get_location_from_ip():
         print(f"Gagal mendapatkan lokasi dari IP. Error: {e}")
         return None
 
+def get_location_from_gpsd():
+    """Mencoba mendapatkan koordinat dari daemon GPSD."""
+    print("Mencoba mendapatkan lokasi dari modul GPS fisik...")
+    try:
+        session = gps.gps(mode=gps.WATCH_ENABLE)
+        report = next(session)
+        # Tunggu sampai mendapatkan 'TPV' report, yang berisi data lokasi.
+        while report['class'] != 'TPV':
+            report = next(session)
+        
+        # 'mode' 3 berarti fix 3D (lat, lon, alt). mode 2 berarti fix 2D (lat, lon).
+        if hasattr(report, 'mode') and report.mode >= 2:
+            lat = report.lat
+            lon = report.lon
+            print(f"Sukses! Lokasi GPS terdeteksi di {lat},{lon}")
+            return f"{lat},{lon}"
+        else:
+            print("GPS terdeteksi, namun belum mendapatkan sinyal (no fix).")
+            return None
+            
+    except StopIteration:
+        print("Daemon GPSD berhenti merespon.")
+        return None
+    except Exception as e:
+        print(f"Gagal terhubung ke daemon GPSD. Pastikan gpsd berjalan. Error: {e}")
+        return None
+
 def get_best_available_location():
-    """Menggunakan IP Geolocation sebagai sumber lokasi utama."""
-    print("\nMenggunakan IP Geolocation sebagai sumber lokasi utama.")
+    location = get_location_from_gpsd()
+    if location:
+        return location 
+
+    print("\nGPS tidak tersedia atau tidak mendapat sinyal. Beralih ke IP Geolocation sebagai fallback.")
     location = get_location_from_ip()
     return location
 
