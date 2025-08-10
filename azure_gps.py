@@ -1,8 +1,7 @@
 import httpx
 
 def get_search_fuzzy(query):
-    # Baca subscription key dari file
-    with open("api.txt", "r") as f:
+    with open("maps_api.txt", "r") as f:
         subscription_key = f.read().strip()
 
     url = "https://atlas.microsoft.com/search/fuzzy/json"
@@ -15,7 +14,7 @@ def get_search_fuzzy(query):
     response = httpx.get(url, params=params)
     return response.json()
 
-query = "Takengon, Aceh Tengah, Aceh"
+query = "Universitas Budi Luhur"
 response_json = get_search_fuzzy(query)
 
 for item in response_json['results']:

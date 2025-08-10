@@ -3,7 +3,7 @@ import time
 import re
 
 def recognize_for_berapa_seconds():
-    with open("api.txt", "r") as f:
+    with open("speech_api.txt", "r") as f:
         AZURE_SPEECH_KEY = f.read().strip()
 
     AZURE_SERVICE_REGION = "southeastasia"
